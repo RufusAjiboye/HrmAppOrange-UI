@@ -1,0 +1,65 @@
+{
+  "include": [
+    "tests/**/*.ts",
+    "playwright.config.ts",
+    "tests/eslint.config.mjs"
+  ], //or "src/**/*.ts" if you have source files
+  "exclude": ["node_modules", "playwright-report", "test-results"],
+  "compilerOptions": {
+    // Environment Settings
+    // See also https://aka.ms/tsconfig/module
+    "module": "nodenext",
+    "target": "esnext",
+    "types": [],
+    // For nodejs:
+    // "lib": ["esnext"],
+    // "types": ["node"],
+    // and npm install -D @types/node
+
+    // Other Outputs
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    // Stricter Typechecking Options
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    // Style Options
+    // "noImplicitReturns": true,
+    // "noImplicitOverride": true,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    // "noFallthroughCasesInSwitch": true,
+    // "noPropertyAccessFromIndexSignature": true,
+
+    // Recommended Options
+    "strict": true,
+    "jsx": "react-jsx",
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
+    "paths": { // barrel export  
+      "@pom": [
+        "./tests/playwright/e2e/pom/index.ts"
+      ],
+      "@pom/*": [
+        "./tests/playwright/e2e/pom/*"
+      ],
+      "@tests": [
+        "./tests/playwright/e2e/tests"
+      ],
+      "@tests/*": [
+        "./tests/playwright/e2e/tests/*"
+      ],
+
+      "@fixture/*": [
+        "./tests/playwright/e2e/fixture/*"
+      ]
+    }
+  }
+}
