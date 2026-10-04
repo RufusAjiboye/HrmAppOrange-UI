@@ -127,7 +127,10 @@ jobs:
                   for (const spec of suite.specs ?? []) {
                     for (const test of spec.tests ?? []) {
                       if (test.status === "unexpected") {
-                        failures.push(spec.title || test.title);
+                        failures.push({
+                          title: spec.title || test.title,
+                          file: spec.file,
+                        });
                       }
                     }
                   }
@@ -144,7 +147,17 @@ jobs:
                 "### Failing scenarios",
                 "",
                 ...(failures.length
-                  ? [...new Set(failures)].map((title) => `- ${title}`)
+                  ? [
+                      ...new Map(
+                        failures.map((failure) => [
+                          `${failure.file}:${failure.title}`,
+                          failure,
+                        ]),
+                      ).values(),
+                    ].map(
+                      ({ title, file }) =>
+                        `- **${title}** — \`tests/playwright/e2e/${file}\``,
+                    )
                   : ["None"]),
               );
             }
