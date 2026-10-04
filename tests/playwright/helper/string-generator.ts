@@ -4,3 +4,5 @@ export function generateDynamicString(prefix = "user") {
 
   return `${prefix}-${suffix}`;
 }
+
+export default generateDynamicString;
