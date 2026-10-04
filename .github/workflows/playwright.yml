@@ -101,7 +101,7 @@ jobs:
         with:
           script: |
             const fs = require("node:fs");
-            const path = "tests/playwright/playwright-report/results.json";
+            const path = "tests/playwright-report/results.json";
             const lines = [
               `## Playwright test results (${process.env.TEST_ENVIRONMENT})`,
               "",

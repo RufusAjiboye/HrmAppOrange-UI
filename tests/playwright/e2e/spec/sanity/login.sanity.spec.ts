@@ -1,5 +1,4 @@
 import { expect, test } from "@fixture/page-fixture.js";
-import { LoginPage } from "@pom";
 
 test.describe("Login Sanity Test", () => {
   test("Login is successful", async ({ loginPage, page }) => {
