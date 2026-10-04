@@ -42,6 +42,12 @@ const config: PlaywrightTestConfig = {
   reporter: [
     ["list"],
     [
+      "json",
+      {
+        outputFile: path.join(__dirname, "playwright-report", "results.json"),
+      },
+    ],
+    [
       "allure-playwright",
       {
         outputFolder: ALLURE_RESULTS_DIR,
