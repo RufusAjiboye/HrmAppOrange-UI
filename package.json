@@ -20,13 +20,16 @@
     "check": "npm run typecheck && npm run lint",
     "validate": "npm run typecheck && npm run lint && npm test",
     "install:browsers": "playwright install",
-    "postinstall": "playwright install chromium"
+    "postinstall": "playwright install chromium", 
+    "test:a11y": "playwright test tests/playwright/e2e/spec/accessibility/hr-orangeapp.accessibility.spec.ts    --config=tests/playwright.config.ts",
+    "test:a11y:headed": "playwright test tests/playwright/e2e/spec/accessibility/hr-orangeapp.accessibility.spec.ts --config=tests/playwright.config.ts --headed"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
     "allure-commandline": "^2.43.0",

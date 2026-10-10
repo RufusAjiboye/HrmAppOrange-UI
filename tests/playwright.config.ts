@@ -15,9 +15,7 @@ dotenv.config({ path: path.join(__dirname, ".env"), override: true });
 const TEST_RESULTS_DIR = path.join(__dirname, "test-results");
 const ALLURE_RESULTS_DIR = path.join(__dirname, "..", "allure-results");
 const PLAYWRIGHT_DIR = path.join(__dirname, "playwright");
-//const SESSION_STORAGE_STATE_PATH = path.join(PLAYWRIGHT_DIR, ".auth", "storageState.json");
 const SESSION_STORAGE_STATE_PATH = path.join(__dirname, "playwright", ".auth", "storageState.json");
-const _AUTH_SETUP_FILE = path.join(PLAYWRIGHT_DIR, "auth-setup.ts");
 const E2E_TEST_DIR = path.join(__dirname, "playwright", "e2e");
 
 const config: PlaywrightTestConfig = {
@@ -63,6 +61,9 @@ const config: PlaywrightTestConfig = {
     screenshot: "only-on-failure",
     video: "retain-on-failure",
     ignoreHTTPSErrors: true,
+    launchOptions: {
+      slowMo: 5000,
+    },
   },
 
   projects: [
@@ -74,15 +75,31 @@ const config: PlaywrightTestConfig = {
         ...devices["Desktop Chrome"],
       },
     },
+    
     {
-      name: "Sanity",
-      testMatch: "**/*.sanity.spec.ts",
+      name: "Accessibility",
+      testMatch: "**/*.accessibility.spec.ts",
+      timeout: 30_000,
+
       use: {
         ...devices["Desktop Chrome"],
         storageState: SESSION_STORAGE_STATE_PATH,
       },
       dependencies: ["Auth Setup"],
     },
+
+    {
+      name: "Sanity",
+      testMatch: "**/*.sanity.spec.ts",
+      timeout: 30_000,
+
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: SESSION_STORAGE_STATE_PATH,
+      },
+      dependencies: ["Auth Setup"],
+    },
+
     {
       name: "Login-journey-on-Chrome",
       testMatch: "**/*login*.spec.ts",
@@ -122,14 +139,6 @@ const config: PlaywrightTestConfig = {
       //testMatch: "**/*login*.spec.ts",
       //use: {
       //  ...devices["Pixel 7"],
-      //},
-    //},
-
-    //{
-      //name: "mobile-safari",
-      //testMatch: "**/*login*.spec.ts",
-      //use: {
-      //  ...devices["iPhone 15"],
       //},
     //},
     {
