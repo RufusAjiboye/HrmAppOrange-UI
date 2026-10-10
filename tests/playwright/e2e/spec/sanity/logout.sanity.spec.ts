@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { LoginPage, UserHomePage } from "@pom";
+import { UserHomePage } from "@pom";
 
 test.describe("Logout Sanity Test", () => {
   test("Logout is successful", async ({ page }) => {
