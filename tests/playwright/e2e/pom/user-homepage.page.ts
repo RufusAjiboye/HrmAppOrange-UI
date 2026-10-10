@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from "@playwright/test";
+import { type Locator, type Page } from "@playwright/test";
 
 import { Basepage } from "./base.page.js";
 
@@ -18,3 +18,4 @@ export class UserHomePage extends Basepage {
     await this.selectDropdownOption(this.profileButtonElement, "Logout");
   }
 }
+ 

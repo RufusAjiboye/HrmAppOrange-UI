@@ -1,0 +1,169 @@
+name: Orange HRM E2E UI Tests
+
+on:
+  pull_request:
+    branches:
+      - develop
+  push:
+    branches:
+      - develop
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to run the tests against
+        type: choice
+        required: true
+        default: dev
+        options:
+          - dev
+          - stg
+          - uat
+          - prod
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Run ESLint
+        run: npm run lint
+
+  test:
+    name: Playwright tests
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'dev' }}
+    env:
+      CI: true
+      BASE_URL: ${{ vars.BASE_URL }}
+      USERNAME: ${{ secrets.USERNAME }}
+      PASSWORD: ${{ secrets.PASSWORD }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox
+
+      - name: Run Playwright tests
+        run: npm test
+
+      - name: Generate Allure report
+        if: always()
+        run: |
+          if [ -d allure-results ] && [ "$(find allure-results -type f -print -quit)" ]; then
+            npm run allure:generate
+          else
+            echo "No Allure results were produced."
+          fi
+
+      - name: Upload Allure report and raw results
+        id: upload-report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-${{ github.run_number }}
+          path: |
+            allure-report/
+            allure-results/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Add test outcome summary
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          TEST_ENVIRONMENT: ${{ inputs.environment || 'dev' }}
+          REPORT_ARTIFACT_URL: ${{ steps.upload-report.outputs.artifact-url }}
+        with:
+          script: |
+            const fs = require("node:fs");
+            const path = "tests/playwright-report/results.json";
+            const lines = [
+              `## Playwright test results (${process.env.TEST_ENVIRONMENT})`,
+              "",
+            ];
+
+            if (!fs.existsSync(path)) {
+              lines.push(
+                "No Playwright JSON report was produced; test setup may have failed before execution.",
+                "",
+                "| Total | Passed | Skipped | Failing |",
+                "| ---: | ---: | ---: | ---: |",
+                "| 0 | ✅ 0 | ⚪ 0 | ❌ 0 |",
+              );
+            } else {
+              const report = JSON.parse(fs.readFileSync(path, "utf8"));
+              const stats = report.stats;
+              const passed = stats.expected + stats.flaky;
+              const total = passed + stats.skipped + stats.unexpected;
+              const failures = [];
+
+              function collectFailures(suites) {
+                for (const suite of suites ?? []) {
+                  for (const spec of suite.specs ?? []) {
+                    for (const test of spec.tests ?? []) {
+                      if (test.status === "unexpected") {
+                        failures.push({
+                          title: spec.title || test.title,
+                          file: spec.file,
+                        });
+                      }
+                    }
+                  }
+                  collectFailures(suite.suites);
+                }
+              }
+
+              collectFailures(report.suites);
+              lines.push(
+                "| Total | Passed | Skipped | Failing |",
+                "| ---: | ---: | ---: | ---: |",
+                `| ${total} | ✅ ${passed} | ⚪ ${stats.skipped} | ❌ ${stats.unexpected} |`,
+                "",
+                "### Failing scenarios",
+                "",
+                ...(failures.length
+                  ? [
+                      ...new Map(
+                        failures.map((failure) => [
+                          `${failure.file}:${failure.title}`,
+                          failure,
+                        ]),
+                      ).values(),
+                    ].map(
+                      ({ title, file }) =>
+                        `- **${title}** — \`tests/playwright/e2e/${file}\``,
+                    )
+                  : ["None"]),
+              );
+            }
+
+            if (process.env.REPORT_ARTIFACT_URL) {
+              lines.push("", `[Download Allure report and results](${process.env.REPORT_ARTIFACT_URL})`);
+            }
+
+            await core.summary.addRaw(lines.join("\n")).write();
