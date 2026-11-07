@@ -31,13 +31,13 @@ const config: PlaywrightTestConfig = {
 
   forbidOnly: !!process.env.CI,
 
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 5 : 2, // Retries failed tests up to 5 times in CI, or up to 2 times otherwise.
 
-  workers: process.env.CI ? 2 : 3,
+  workers: process.env.CI ? 2 : 3, // Use 2 workers in CI, or 3 workers otherwise. A worker is a test runner that handle one test at a time. A worker is a process that runs tests.
 
   outputDir: TEST_RESULTS_DIR,
 
-  reporter: [
+  reporter: [ 
     ["list"],
     [
       "json",
@@ -57,8 +57,8 @@ const config: PlaywrightTestConfig = {
 
   use: {
     baseURL: process.env.BASE_URL ?? process.env.BASE_URL,
-    trace: "retain-on-failure",
-    screenshot: "only-on-failure",
+    trace: "retain-on-failure", 
+    screenshot: "only-on-failure", 
     video: "retain-on-failure",
     ignoreHTTPSErrors: true,
     launchOptions: {
@@ -95,7 +95,7 @@ const config: PlaywrightTestConfig = {
 
       use: {
         ...devices["Desktop Chrome"],
-        storageState: SESSION_STORAGE_STATE_PATH,
+        storageState: SESSION_STORAGE_STATE_PATH, 
       },
       dependencies: ["Auth Setup"],
     },
@@ -104,12 +104,22 @@ const config: PlaywrightTestConfig = {
       name: "Login-journey-on-Chrome",
       testMatch: "**/*login*.spec.ts",
       use: {
-        ...devices["Desktop Chrome"],
+        ...devices["Desktop Chrome"], // 
       },
     },
 
     {
       name: "logout-sanity",
+      testMatch: "**/*logout*.spec.ts",
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: SESSION_STORAGE_STATE_PATH,
+      },
+      dependencies: ["Auth Setup"],
+    },
+
+    {
+      name: "logout-sanity-duplicate",
       testMatch: "**/*logout*.spec.ts",
       use: {
         ...devices["Desktop Chrome"],
@@ -126,74 +136,77 @@ const config: PlaywrightTestConfig = {
       },
     },
 
-    //{
-      //name: "Login-journey-on-Webkit",
-      //testMatch: "**/*login*.spec.ts",
-      //use: {
-      //  ...devices["Desktop Safari"],
-      //},
-    //},
-
-    //{
-      //name: "Login-journey-on-mobile-chrome",
-      //testMatch: "**/*login*.spec.ts",
-      //use: {
-      //  ...devices["Pixel 7"],
-      //},
-    //},
     {
-      name: "Login-journey-on-Firefox",
+      name: "Login-journey-on-Webkit",
+      testMatch: "**/*login*.spec.ts",
+      use: {
+        ...devices["Desktop Safari"],
+      },
+    },
+
+    {
+      name: "Login-journey-on-mobile-chrome",
+      testMatch: "**/*login*.spec.ts",
+      use: {
+        ...devices["Pixel 7"],
+      },
+    },
+
+    {
+      name: "Login-journey-on-Firefox-2",
       testMatch: "**/*login*.spec.ts",
       use: {
         ...devices["Desktop Firefox"],
       },
     },
-    
-    //{
-      //name: "Login-journey-on-Webkit",
-      //testMatch: "**/*login*.spec.ts",
-      //use: {
-      //  ...devices["Desktop Safari"],
-      //},
-    //},
 
-    // {
-      //name: "Login-journey-on-mobile-chrome",
-      //testMatch: "**/*login*.spec.ts",
-      //use: {
-      //  ...devices["Pixel 7"],
-      //},
-    //},
+    {
+      name: "Login-journey-on-Webkit-2",
+      testMatch: "**/*login*.spec.ts",
+      use: {
+        ...devices["Desktop Safari"],
+      },
+    },
 
-    //{
-      //name: "mobile-safari",
-      //testMatch: "**/*login*.spec.ts",
-      //use: {
-      //  ...devices["iPhone 15"],
-      //},
-    //},
+    {
+      name: "Login-journey-on-mobile-chrome-2",
+      testMatch: "**/*login*.spec.ts",
+      use: {
+        ...devices["Pixel 7"],
+      },
+    },
 
-    //{
-      //name: "Login-journey-on-Firefox",
-      //testMatch: "**/*login*.spec.ts",
-      //use: {
-      //  ...devices["Desktop Firefox"],
-      //},
-    //},
-    //{
-      //name: "Login-journey-on-Webkit",
-      //testMatch: "**/*login*.spec.ts",
-      //use: {
-      //  ...devices["Desktop Safari"],
-      //},
-    //},
-    //{
-      //name: "Login-journey-on-mobile-chrome",
-      //testMatch: "**/*login*.spec.ts",
-      //use: {
-      //  ...devices["Pixel 7"],
-      //},
-    //},
+    {
+      name: "mobile-safari",
+      testMatch: "**/*login*.spec.ts",
+      use: {
+        ...devices["iPhone 15"],
+      },
+    },
+
+    {
+      name: "Login-journey-on-Firefox-3",
+      testMatch: "**/*login*.spec.ts",
+      use: {
+        ...devices["Desktop Firefox"],
+      },
+    },
+
+    {
+      name: "Login-journey-on-Webkit-3",
+      testMatch: "**/*login*.spec.ts",
+      use: {
+        ...devices["Desktop Safari"],
+      },
+    },
+
+    {
+      name: "Login-journey-on-mobile-chrome-3",
+      testMatch: "**/*login*.spec.ts",
+      use: {
+        ...devices["Pixel 7"],
+      },
+    },
   ],
 };
 export default config;
